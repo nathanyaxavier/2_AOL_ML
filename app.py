@@ -12,14 +12,11 @@ def load_model():
 
 model, scaler, columns = load_model()
 
-# Konfigurasi Halaman
 st.set_page_config(
     page_title="Paddy Yield Prediction",
     layout="wide"
 )
 
-# Definisi Palet Warna Adaptif (Mendukung Light & Dark Mode)
-# Amber Flame: #F7A503, Sunny Wheat: #FFDA8C, Vanilla Cream: #FFEBBC, Olive Meadow: #B3BC53, Forest Moss: #768C3A
 st.markdown("""
     <style>
     /* ==========================================================================
@@ -176,7 +173,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Banner Gambar Utama
 try:
     img = Image.open("logo_padi.jpg")
     width, height = img.size
@@ -185,7 +181,7 @@ try:
 except Exception:
     pass
 
-# Judul Utama dan Deskripsi Aplikasi
+
 st.title("Paddy Yield Prediction System")
 st.write(
     """
@@ -195,11 +191,9 @@ st.write(
 )
 st.markdown("---")
 
-# Menggunakan Sistem Grid/Kolom untuk Input Data
 col1, col2 = st.columns(2)
 
 with col1:
-    # KARTU 1: Luas Lahan Utama
     st.markdown("""
         <div class="input-card">
             <div class="card-title">Luas Lahan Utama (Hectares)</div>
@@ -227,7 +221,6 @@ with col1:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # KARTU 2: Area Pembibitan Awal
     st.markdown("""
         <div class="input-card">
             <div class="card-title">Area Pembibitan Awal (Nursery)</div>
@@ -255,7 +248,6 @@ with col1:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # KARTU 3: Pengolahan Lahan Utama
     st.markdown("""
         <div class="input-card">
             <div class="card-title">Pengolahan Lahan Utama</div>
@@ -284,7 +276,6 @@ with col1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    # KARTU 4: Pemupukan & Nutrisi Tanaman
     st.markdown("""
         <div class="input-card">
             <div class="card-title">Pemupukan & Nutrisi Tanaman</div>
@@ -330,7 +321,6 @@ with col2:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # KARTU 5: Perlindungan Tanaman
     st.markdown("""
         <div class="input-card">
             <div class="card-title">Perlindungan Tanaman</div>
@@ -358,7 +348,6 @@ with col2:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Tombol Eksekusi Prediksi
 predict_button = st.button("Hitung Prediksi Hasil Panen")
 
 if predict_button:
@@ -378,15 +367,12 @@ if predict_button:
     })
 
     try:
-        # Penyelarasan kolom fitur model
         input_df = input_df.reindex(columns=columns, fill_value=0)
         input_scaled = scaler.transform(input_df)
         prediction = model.predict(input_scaled)[0]
 
-        # Perhitungan produktivitas per hektar untuk penentuan kategori evaluasi
         yield_per_hectare = prediction / hectares if hectares > 0 else 0
         
-        # Penentuan Kategori Produktivitas
         if yield_per_hectare < 4000:
             status_class = "status-rendah"
             status_label = "Rendah"
@@ -397,7 +383,6 @@ if predict_button:
             status_class = "status-tinggi"
             status_label = "Tinggi"
 
-        # Tampilan Hasil Utama berbasis Desain Kartu Profesional
         st.markdown(f"""
             <div class="result-card">
                 <div style="font-size: 18px; color: #555555; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">
@@ -416,12 +401,10 @@ if predict_button:
             </div>
         """, unsafe_allow_html=True)
 
-        # Bagian Analisis Interpretasi & Rekomendasi Budidaya Spesifik Berdasarkan Input
         st.subheader("Analisis Hasil & Rekomendasi Budidaya")
         
         st.markdown('<div class="recommendation-box">', unsafe_allow_html=True)
         
-        # 1. Analisis Faktor Lahan & Benih
         rasio_benih = seedrate / hectares if hectares > 0 else 0
         st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
         if rasio_benih < 20:
@@ -432,7 +415,6 @@ if predict_button:
             st.markdown("<span class='recommendation-title'>Manajemen Benih:</span> Proporsi sebaran benih terhadap luas lahan utama sudah berada dalam kondisi ideal untuk mendukung pertumbuhan populasi tanaman.", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # 2. Analisis Pengolahan Tanah Pembibitan & Lahan Utama
         st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
         if lp_mainfield / hectares < 20:
             st.markdown("<span class='recommendation-title'>Kesuburan Tanah Utama:</span> Alokasi pupuk organik/kompos dasar pada pengolahan lahan utama relatif minim. Pertimbangkan peningkatan volume pupuk organik di awal pembajakan berikutnya guna memperbaiki struktur pori tanah dan kapasitas tukar kation.", unsafe_allow_html=True)
@@ -440,7 +422,6 @@ if predict_button:
             st.markdown("<span class='recommendation-title'>Kesuburan Tanah Utama:</span> Pengaplikasian bahan organik dasar pada pengolahan tanah utama terpantau optimal, yang secara nyata membantu stabilitas ekosistem mikroba tanah.", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # 3. Analisis Kebutuhan Nutrisi Makro (DAP, Urea, Potash)
         st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
         rekomendasi_nutrisi = []
         if urea < 150:
@@ -456,7 +437,6 @@ if predict_button:
             st.markdown("<span class='recommendation-title'>Strategi Pemupukan Makro:</span> Pemberian kombinasi pupuk Urea, DAP, dan Potash telah seimbang, memberikan pondasi nutrisi kuat pada fase kritis pertumbuhan.", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # 4. Analisis Nutrisi Mikro & Fase Generatif
         st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
         if micronutrients > 70:
             st.markdown("<span class='recommendation-title'>Nutrisi Mikro:</span> Penyemprotan suplemen nutrisi mikro pada hari ke-70 terbukti membantu efisiensi metabolisme tanaman dalam pengisian kualitas bulir padi pada fase generatif.", unsafe_allow_html=True)
@@ -464,7 +444,6 @@ if predict_button:
             st.markdown("<span class='recommendation-title'>Nutrisi Mikro:</span> Pemberian unsur mikro hara terpantau minimal. Untuk musim berikutnya, pertimbangkan penambahan seng (Zn) atau besi (Fe) pada fase pengisian bulir demi menghindari bulir padi hampa.", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # 5. Analisis Strategi Perlindungan Hama & Gulma
         st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
         if weed < 10:
             st.markdown("<span class='recommendation-title'>Perlindungan Gulma:</span> Aplikasi herbisida pra/purna tumbuh di bawah ambang standar. Awasi pertumbuhan gulma liar di hari ke-28 agar tidak merebut jatah pupuk utama tanaman padi.", unsafe_allow_html=True)
@@ -481,7 +460,6 @@ if predict_button:
 
 st.markdown("---")
 
-# Catatan Penggunaan Aplikasi
 st.info(
     """
     Catatan Penggunaan:
