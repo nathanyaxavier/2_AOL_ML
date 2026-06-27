@@ -19,11 +19,6 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* ==========================================================================
-       1. PENGATURAN GLOBAL & ADAPTIF TEMA (LIGHT/DARK MODE)
-       ========================================================================== */
-    
-    /* Default / Gaya untuk Light Mode */
     html, body, [data-testid="stAppViewContainer"] {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         background-color: #FDFBF7;
@@ -69,28 +64,55 @@ st.markdown("""
         margin-top: 25px;
         box-shadow: 0 4px 15px rgba(247, 165, 3, 0.15);
     }
-    .recommendation-box {
+    
+    .recommendation-container {
         background-color: #FFFFFF;
         border: 1px solid #E0E0E0;
         border-left: 6px solid #768C3A;
-        padding: 20px;
+        padding: 28px;
+        border-radius: 12px;
+        margin-top: 25px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+    .recommendation-header {
+        color: #768C3A;
+        font-size: 22px;
+        font-weight: 700;
+        margin-top: 0px;
+        margin-bottom: 15px;
+    }
+    .recommendation-item-box {
+        background-color: #FDFBF7;
+        padding: 15px;
         border-radius: 8px;
-        margin-top: 15px;
+        margin-top: 12px;
+        border: 1px dashed #E0E0E0;
         color: #333333;
     }
+    
+    .info-card {
+        background-color: #FFEBBC;
+        border: 1px solid #FFDA8C;
+        border-left: 6px solid #F7A503;
+        padding: 18px;
+        border-radius: 8px;
+        color: #444444;
+        margin-top: 15px;
+        margin-bottom: 25px;
+        font-size: 14px;
+    }
 
-    /* Penyesuaian Otomatis Ketika User Menggunakan Dark Mode */
     @media (prefers-color-scheme: dark) {
         html, body, [data-testid="stAppViewContainer"] {
             background-color: #121212;
         }
         .input-card {
-            background-color: #2D271E; /* Versi gelap dari Vanilla Cream */
+            background-color: #2D271E;
             border-left: 6px solid #768C3A;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .card-title {
-            color: #FFDA8C; /* Sunny Wheat agar kontras di latar gelap */
+            color: #FFDA8C;
         }
         .card-caption {
             color: #CCCCCC;
@@ -106,21 +128,31 @@ st.markdown("""
             border: 1px solid #768C3A !important;
         }
         .result-card {
-            background-color: #2D210A; /* Versi gelap dari Amber/Yellow */
+            background-color: #2D210A;
             border: 2px solid #F7A503;
             box-shadow: 0 4px 15px rgba(247, 165, 3, 0.3);
         }
-        .recommendation-box {
+        .recommendation-container {
             background-color: #1E1E1E;
             border: 1px solid #333333;
             border-left: 6px solid #B3BC53;
+        }
+        .recommendation-header {
+            color: #FFDA8C;
+        }
+        .recommendation-item-box {
+            background-color: #252525;
+            border: 1px dashed #444444;
             color: #E0E0E0;
+        }
+        .info-card {
+            background-color: #2A241A;
+            border: 1px solid #443B2B;
+            border-left: 6px solid #F7A503;
+            color: #DDDDDD;
         }
     }
 
-    /* ==========================================================================
-       2. PENGATURAN ELEMEN STATIS (BERLAKU DI KEDUA MODE)
-       ========================================================================== */
     h1, h2, h3 {
         color: #768C3A !important;
         font-weight: 700;
@@ -163,7 +195,6 @@ st.markdown("""
     .status-rendah { background-color: #F8D7DA; color: #721C24; border: 1px solid #F5C6CB; }
     
     .recommendation-item {
-        margin-bottom: 12px;
         line-height: 1.6;
     }
     .recommendation-title {
@@ -181,7 +212,6 @@ try:
 except Exception:
     pass
 
-
 st.title("Paddy Yield Prediction System")
 st.write(
     """
@@ -189,164 +219,169 @@ st.write(
     kondisi lahan, penggunaan benih, pemupukan, serta perlindungan tanaman.
     """
 )
+
+st.markdown("""
+    <div class="info-card">
+        <strong>Catatan Penggunaan:</strong><br>
+        • Masukkan seluruh data numerik sesuai dengan kondisi aktual operasional pertanian Anda di lapangan.<br>
+        • Format penulisan angka desimal wajib menggunakan tanda titik (.) sebagai pemisah (contoh: 62.28).
+    </div>
+""", unsafe_allow_html=True)
+
 st.markdown("---")
 
-col1, col2 = st.columns(2)
+st.markdown("""
+    <div class="input-card">
+        <div class="card-title">Luas Lahan Utama (Hectares)</div>
+        <div class="card-caption">
+            Masukkan total luas lahan sawah aktif yang digunakan untuk budidaya padi pada musim tanam saat ini.
+        </div>
+""", unsafe_allow_html=True)
 
-with col1:
-    st.markdown("""
-        <div class="input-card">
-            <div class="card-title">Luas Lahan Utama (Hectares)</div>
-            <div class="card-caption">
-                Masukkan total luas lahan sawah aktif yang digunakan untuk budidaya padi pada musim tanam saat ini.
-            </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("**Luas Lahan (ha)**")
-    st.caption("Luas total area sawah aktif yang Anda tanami padi saat ini.")
-    hectares = st.number_input(
-        label="Luas Lahan (ha)",
-        min_value=0.0,
-        value=2.5,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("**Jumlah Benih Padi (kg)**")
-    st.caption("Berat total benih yang disemai untuk kebutuhan musim tanam ini.")
-    seedrate = st.number_input(
-        label="Jumlah Benih Padi (kg)",
-        min_value=0.0,
-        value=150.0,
-        label_visibility="collapsed"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("**Luas Lahan (ha)**")
+st.caption("Luas total area sawah aktif yang Anda tanami padi saat ini.")
+hectares = st.number_input(
+    label="Luas Lahan (ha)",
+    min_value=0.0,
+    value=2.5,
+    label_visibility="collapsed"
+)
 
-    st.markdown("""
-        <div class="input-card">
-            <div class="card-title">Area Pembibitan Awal (Nursery)</div>
-            <div class="card-caption">
-                Masukkan informasi mengenai area pembibitan dan persiapan tanah yang digunakan sebelum dipindahkan ke lahan utama.
-            </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("**Luas Area Pembibitan (Cents)**")
-    st.caption("Luas petak tanah khusus yang Anda gunakan untuk menyemai benih awal sebelum dipindahkan ke sawah utama.")
-    nursery_area = st.number_input(
-        label="Luas Area Pembibitan (Cents)",
-        min_value=0.0,
-        value=120.0,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("**Persiapan Tanah Pembibitan (Ton)**")
-    st.caption("Banyaknya pupuk organik atau kompos yang diberikan untuk mengelola tanah khusus di area pembibitan awal.")
-    lp_nursery = st.number_input(
-        label="Persiapan Tanah Pembibitan (Ton)",
-        min_value=0.0,
-        value=6.0,
-        label_visibility="collapsed"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("**Jumlah Benih Padi (kg)**")
+st.caption("Berat total benih yang disemai untuk kebutuhan musim tanam ini.")
+seedrate = st.number_input(
+    label="Jumlah Benih Padi (kg)",
+    min_value=0.0,
+    value=150.0,
+    label_visibility="collapsed"
+)
+st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("""
-        <div class="input-card">
-            <div class="card-title">Pengolahan Lahan Utama</div>
-            <div class="card-caption">
-                Masukkan data terkait lahan sawah utama, termasuk penggunaan bahan organik dan pengelolaan sisa tanaman.
-            </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("**Persiapan Lahan Utama (Ton)**")
-    st.caption("Total berat pupuk organik, kompos, atau kapur dasar saat pertama kali membajak sawah utama.")
-    lp_mainfield = st.number_input(
-        label="Persiapan Lahan Utama (Ton)",
-        min_value=0.0,
-        value=75.0,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("**Pengelolaan Jerami / Sisa Sawah (Bundles)**")
-    st.caption("Jumlah ikatan jerami atau sisa rumput kering hasil panen lalu yang dihamparkan kembali sebagai mulsa alami.")
-    trash = st.number_input(
-        label="Pengelolaan Jerami (Bundles)",
-        min_value=0.0,
-        value=540.0,
-        label_visibility="collapsed"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("""
+    <div class="input-card">
+        <div class="card-title">Area Pembibitan Awal (Nursery)</div>
+        <div class="card-caption">
+            Masukkan informasi mengenai area pembibitan dan persiapan tanah yang digunakan sebelum dipindahkan ke lahan utama.
+        </div>
+""", unsafe_allow_html=True)
 
-with col2:
-    st.markdown("""
-        <div class="input-card">
-            <div class="card-title">Pemupukan & Nutrisi Tanaman</div>
-            <div class="card-caption">
-                Masukkan jumlah pupuk dan nutrisi yang diberikan pada berbagai fase pertumbuhan padi.
-            </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("**Pupuk DAP Hari Ke-20 (Kg)**")
-    st.caption("Dosis pupuk Di-ammonium Phosphate yang diberikan saat usia padi menginjak 20 hari setelah tanam.")
-    dap = st.number_input(
-        label="Pupuk DAP Hari Ke-20 (Kg)",
-        min_value=0.0,
-        value=240.0,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("**Pupuk Urea Hari Ke-40 (Kg)**")
-    st.caption("Dosis pupuk Nitrogen (Urea) yang ditaburkan pada umur tanaman 40 hari guna memacu fase vegetatif.")
-    urea = st.number_input(
-        label="Pupuk Urea Hari Ke-40 (Kg)",
-        min_value=0.0,
-        value=162.78,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("**Pupuk Kalium / Potash Hari Ke-50 (Kg)**")
-    st.caption("Dosis pupuk Kalium (Potash/KCL) yang ditaburkan pada umur 50 hari untuk membantu pengisian bulir.")
-    potash = st.number_input(
-        label="Pupuk Kalium / Potash Hari Ke-50 (Kg)",
-        min_value=0.0,
-        value=62.28,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("**Nutrisi Mikro Hari Ke-70 (Kg)**")
-    st.caption("Dosis suplemen zat hara mikro (seng, besi, mangan) yang disemprotkan pada umur 70 hari.")
-    micronutrients = st.number_input(
-        label="Nutrisi Mikro Hari Ke-70 (Kg)",
-        min_value=0.0,
-        value=90.0,
-        label_visibility="collapsed"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("**Luas Area Pembibitan (Cents)**")
+st.caption("Luas petak tanah khusus yang Anda gunakan untuk menyemai benih awal sebelum dipindahkan ke sawah utama.")
+nursery_area = st.number_input(
+    label="Luas Area Pembibitan (Cents)",
+    min_value=0.0,
+    value=120.0,
+    label_visibility="collapsed"
+)
 
-    st.markdown("""
-        <div class="input-card">
-            <div class="card-title">Perlindungan Tanaman</div>
-            <div class="card-caption">
-                Masukkan data penggunaan herbisida dan pestisida yang diterapkan selama masa tanam.
-            </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("**Herbisida Hari Ke-28 (Litre)**")
-    st.caption("Dosis cairan pembasmi rumput liar/gulma (berbahan kimia Thiobencarb) pada hari ke-28.")
-    weed = st.number_input(
-        label="Herbisida Hari Ke-28 (Litre)",
-        min_value=0.0,
-        value=12.0,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("**Pestisida Hari Ke-60 (ml)**")
-    st.caption("Volume cairan pembasmi serangga atau hama penyakit yang disemprotkan pada umur 60 hari.")
-    pest = st.number_input(
-        label="Pestisida Hari Ke-60 (ml)",
-        min_value=0.0,
-        value=3600.0,
-        label_visibility="collapsed"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("**Persiapan Tanah Pembibitan (Ton)**")
+st.caption("Banyaknya pupuk organik atau kompos yang diberikan untuk mengelola tanah khusus di area pembibitan awal.")
+lp_nursery = st.number_input(
+    label="Persiapan Tanah Pembibitan (Ton)",
+    min_value=0.0,
+    value=6.0,
+    label_visibility="collapsed"
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown("""
+    <div class="input-card">
+        <div class="card-title">Pengolahan Lahan Utama</div>
+        <div class="card-caption">
+            Masukkan data terkait lahan sawah utama, termasuk penggunaan bahan organik dan pengelolaan sisa tanaman.
+        </div>
+""", unsafe_allow_html=True)
+
+st.markdown("**Persiapan Lahan Utama (Ton)**")
+st.caption("Total berat pupuk organik, kompos, atau kapur dasar saat pertama kali membajak sawah utama.")
+lp_mainfield = st.number_input(
+    label="Persiapan Lahan Utama (Ton)",
+    min_value=0.0,
+    value=75.0,
+    label_visibility="collapsed"
+)
+
+st.markdown("**Pengelolaan Jerami / Sisa Sawah (Bundles)**")
+st.caption("Jumlah ikatan jerami atau sisa rumput kering hasil panen lalu yang dihamparkan kembali sebagai mulsa alami.")
+trash = st.number_input(
+    label="Pengelolaan Jerami (Bundles)",
+    min_value=0.0,
+    value=540.0,
+    label_visibility="collapsed"
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown("""
+    <div class="input-card">
+        <div class="card-title">Pemupukan & Nutrisi Tanaman</div>
+        <div class="card-caption">
+            Masukkan jumlah pupuk dan nutrisi yang diberikan pada berbagai fase pertumbuhan padi.
+        </div>
+""", unsafe_allow_html=True)
+
+st.markdown("**Pupuk DAP Hari Ke-20 (Kg)**")
+st.caption("Dosis pupuk Di-ammonium Phosphate yang diberikan saat usia padi menginjak 20 hari setelah tanam.")
+dap = st.number_input(
+    label="Pupuk DAP Hari Ke-20 (Kg)",
+    min_value=0.0,
+    value=240.0,
+    label_visibility="collapsed"
+)
+
+st.markdown("**Pupuk Urea Hari Ke-40 (Kg)**")
+st.caption("Dosis pupuk Nitrogen (Urea) yang ditaburkan pada umur tanaman 40 hari guna memacu fase vegetatif.")
+urea = st.number_input(
+    label="Pupuk Urea Hari Ke-40 (Kg)",
+    min_value=0.0,
+    value=162.78,
+    label_visibility="collapsed"
+)
+
+st.markdown("**Pupuk Kalium / Potash Hari Ke-50 (Kg)**")
+st.caption("Dosis pupuk Kalium (Potash/KCL) yang ditaburkan pada umur 50 hari untuk membantu pengisian bulir.")
+potash = st.number_input(
+    label="Pupuk Kalium / Potash Hari Ke-50 (Kg)",
+    min_value=0.0,
+    value=62.28,
+    label_visibility="collapsed"
+)
+
+st.markdown("**Nutrisi Mikro Hari Ke-70 (Kg)**")
+st.caption("Dosis suplemen zat hara mikro (seng, besi, mangan) yang disemprotkan pada umur 70 hari.")
+micronutrients = st.number_input(
+    label="Nutrisi Mikro Hari Ke-70 (Kg)",
+    min_value=0.0,
+    value=90.0,
+    label_visibility="collapsed"
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown("""
+    <div class="input-card">
+        <div class="card-title">Perlindungan Tanaman</div>
+        <div class="card-caption">
+            Masukkan data penggunaan herbisida dan pestisida yang diterapkan selama masa tanam.
+        </div>
+""", unsafe_allow_html=True)
+
+st.markdown("**Herbisida Hari Ke-28 (Litre)**")
+st.caption("Dosis cairan pembasmi rumput liar/gulma (berbahan kimia Thiobencarb) pada hari ke-28.")
+weed = st.number_input(
+    label="Herbisida Hari Ke-28 (Litre)",
+    min_value=0.0,
+    value=12.0,
+    label_visibility="collapsed"
+)
+
+st.markdown("**Pestisida Hari Ke-60 (ml)**")
+st.caption("Volume cairan pembasmi serangga atau hama penyakit yang disemprotkan pada umur 60 hari.")
+pest = st.number_input(
+    label="Pestisida Hari Ke-60 (ml)",
+    min_value=0.0,
+    value=3600.0,
+    label_visibility="collapsed"
+)
+st.markdown('</div>', unsafe_allow_html=True)
 
 predict_button = st.button("Hitung Prediksi Hasil Panen")
 
@@ -401,69 +436,64 @@ if predict_button:
             </div>
         """, unsafe_allow_html=True)
 
-        st.subheader("Analisis Hasil & Rekomendasi Budidaya")
-        
-        st.markdown('<div class="recommendation-box">', unsafe_allow_html=True)
+        recommendation_html = """
+        <div class="recommendation-container">
+            <div class="recommendation-header">Analisis Hasil & Rekomendasi Budidaya</div>
+        """
         
         rasio_benih = seedrate / hectares if hectares > 0 else 0
-        st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
+        recommendation_html += '<div class="recommendation-item-box">'
         if rasio_benih < 20:
-            st.markdown("<span class='recommendation-title'>Manajemen Benih:</span> Penggunaan benih Anda tergolong rendah per hektarnya (kurang dari 20 kg/ha). Disarankan untuk mengoptimalkan populasi tanaman dengan menambah kapasitas benih berkualitas tinggi agar ruang lahan utama termanfaatkan dengan maksimal.", unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Manajemen Benih:</span> Penggunaan benih Anda tergolong rendah per hektarnya (kurang dari 20 kg/ha). Disarankan untuk mengoptimalkan populasi tanaman dengan menambah kapasitas benih berkualitas tinggi agar ruang lahan utama termanfaatkan dengan maksimal."
         elif rasio_benih > 60:
-            st.markdown("<span class='recommendation-title'>Manajemen Benih:</span> Jumlah benih per hektar terpantau sangat tinggi. Hal ini berisiko memicu kepadatan tanaman yang berlebihan, mempermudah penyebaran hama, serta meningkatkan kompetisi nutrisi antar batang padi.", unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Manajemen Benih:</span> Jumlah benih per hektar terpantau sangat tinggi. Hal ini berisiko memicu kepadatan tanaman yang berlebihan, mempermudah penyebaran hama, serta meningkatkan kompetisi nutrisi antar batang padi."
         else:
-            st.markdown("<span class='recommendation-title'>Manajemen Benih:</span> Proporsi sebaran benih terhadap luas lahan utama sudah berada dalam kondisi ideal untuk mendukung pertumbuhan populasi tanaman.", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Manajemen Benih:</span> Proporsi sebaran benih terhadap luas lahan utama sudah berada dalam kondisi ideal untuk mendukung pertumbuhan populasi tanaman."
+        recommendation_html += '</div>'
 
-        st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
+        recommendation_html += '<div class="recommendation-item-box">'
         if lp_mainfield / hectares < 20:
-            st.markdown("<span class='recommendation-title'>Kesuburan Tanah Utama:</span> Alokasi pupuk organik/kompos dasar pada pengolahan lahan utama relatif minim. Pertimbangkan peningkatan volume pupuk organik di awal pembajakan berikutnya guna memperbaiki struktur pori tanah dan kapasitas tukar kation.", unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Kesuburan Tanah Utama:</span> Alokasi pupuk organik/kompos dasar pada pengolahan lahan utama relatif minim. Pertimbangkan peningkatan volume pupuk organik di awal pembajakan berikutnya guna memperbaiki struktur pori tanah dan kapasitas tukar kation."
         else:
-            st.markdown("<span class='recommendation-title'>Kesuburan Tanah Utama:</span> Pengaplikasian bahan organik dasar pada pengolahan tanah utama terpantau optimal, yang secara nyata membantu stabilitas ekosistem mikroba tanah.", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Kesuburan Tanah Utama:</span> Pengaplikasian bahan organik dasar pada pengolahan tanah utama terpantau optimal, yang secara nyata membantu stabilitas ekosistem mikroba tanah."
+        recommendation_html += '</div>'
 
-        st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
+        recommendation_html += '<div class="recommendation-item-box">'
         rekomendasi_nutrisi = []
         if urea < 150:
-            rekomendasi_nutrisi.append("Menambah takaran pupuk Nitrogen (Urea) secara berkala pada fase vegetatif hari ke-40 jika daun tampak pucat.")
+            rekomendasi_nutrisi.append("Menambah takaran pupuk Nitrogen (Urea) secara berkala pada fase vegetatif hari ke-40 jika daun tampak pucat")
         if potash < 50:
-            rekomendasi_nutrisi.append("Mengoptimalkan unsur Kalium (Potash) di umur 50 hari untuk meminimalkan kerontokan serta memperkuat dinding sel tanaman.")
+            rekomendasi_nutrisi.append("Mengoptimalkan unsur Kalium (Potash) di umur 50 hari untuk meminimalkan kerontokan serta memperkuat dinding sel tanaman")
         if dap < 200:
-            rekomendasi_nutrisi.append("Memastikan kecukupan hara Fosfat (DAP) pada awal tanam (hari ke-20) guna mempercepat multiplikasi akar.")
+            rekomendasi_nutrisi.append("Memastikan kecukupan hara Fosfat (DAP) pada awal tanam (hari ke-20) guna mempercepat multiplikasi akar")
             
         if rekomendasi_nutrisi:
-            st.markdown("<span class='recommendation-title'>Strategi Pemupukan Makro:</span> Berdasarkan kalkulasi dosis, Anda disarankan untuk: " + ", ".join(rekomendasi_nutrisi) + ".", unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Strategi Pemupukan Makro:</span> Berdasarkan kalkulasi dosis, Anda disarankan untuk: " + ", ".join(rekomendasi_nutrisi) + "."
         else:
-            st.markdown("<span class='recommendation-title'>Strategi Pemupukan Makro:</span> Pemberian kombinasi pupuk Urea, DAP, dan Potash telah seimbang, memberikan pondasi nutrisi kuat pada fase kritis pertumbuhan.", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Strategi Pemupukan Makro:</span> Pemberian kombinasi pupuk Urea, DAP, dan Potash telah seimbang, memberikan pondasi nutrisi kuat pada fase kritis pertumbuhan."
+        recommendation_html += '</div>'
 
-        st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
+        recommendation_html += '<div class="recommendation-item-box">'
         if micronutrients > 70:
-            st.markdown("<span class='recommendation-title'>Nutrisi Mikro:</span> Penyemprotan suplemen nutrisi mikro pada hari ke-70 terbukti membantu efisiensi metabolisme tanaman dalam pengisian kualitas bulir padi pada fase generatif.", unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Nutrisi Mikro:</span> Penyemprotan suplemen nutrisi mikro pada hari ke-70 terbukti membantu efisiensi metabolisme tanaman dalam pengisian kualitas bulir padi pada fase generatif."
         else:
-            st.markdown("<span class='recommendation-title'>Nutrisi Mikro:</span> Pemberian unsur mikro hara terpantau minimal. Untuk musim berikutnya, pertimbangkan penambahan seng (Zn) atau besi (Fe) pada fase pengisian bulir demi menghindari bulir padi hampa.", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Nutrisi Mikro:</span> Pemberian unsur mikro hara terpantau minimal. Untuk musim berikutnya, pertimbangkan penambahan seng (Zn) atau besi (Fe) pada fase pengisian bulir demi menghindari bulir padi hampa."
+        recommendation_html += '</div>'
 
-        st.markdown('<div class="recommendation-item">', unsafe_allow_html=True)
+        recommendation_html += '<div class="recommendation-item-box">'
         if weed < 10:
-            st.markdown("<span class='recommendation-title'>Perlindungan Gulma:</span> Aplikasi herbisida pra/purna tumbuh di bawah ambang standar. Awasi pertumbuhan gulma liar di hari ke-28 agar tidak merebut jatah pupuk utama tanaman padi.", unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Perlindungan Gulma:</span> Aplikasi herbisida pra/purna tumbuh di bawah ambang standar. Awasi pertumbuhan gulma liar di hari ke-28 agar tidak merebut jatah pupuk utama tanaman padi."
         elif pest < 2500:
-            st.markdown("<span class='recommendation-title'>Perlindungan Hama:</span> Intensitas perlindungan hama cair di bawah rata-rata nasional untuk skala lahan Anda. Lakukan monitoring ketat terhadap vektor penyakit seperti wereng atau penggerek batang menjelang hari ke-60.", unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Perlindungan Hama:</span> Intensitas perlindungan hama cair di bawah rata-rata nasional untuk skala lahan Anda. Lakukan monitoring ketat terhadap vektor penyakit seperti wereng atau penggerek batang menjelang hari ke-60."
         else:
-            st.markdown("<span class='recommendation-title'>Perlindungan Tanaman:</span> Langkah preventif perlindungan terhadap intervensi gulma pengganggu dan serangan hama penyakit sudah dikelola dengan intensif.", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            recommendation_html += "<span class='recommendation-title'>Perlindungan Tanaman:</span> Langkah preventif perlindungan terhadap intervensi gulma pengganggu dan serangan hama penyakit sudah dikelola dengan intensif."
+        recommendation_html += '</div>'
 
-        st.markdown('</div>', unsafe_allow_html=True)
+        recommendation_html += "</div>"
+        
+        st.markdown(recommendation_html, unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"Terjadi kesalahan teknis saat melakukan kalkulasi prediksi: {e}")
 
 st.markdown("---")
-
-st.info(
-    """
-    Catatan Penggunaan:
-    - Masukkan seluruh data numerik sesuai dengan kondisi aktual operasional pertanian Anda di lapangan.
-    - Format penulisan angka desimal wajib menggunakan tanda titik (.) sebagai pemisah (contoh: 62.28).
-    """
-)
